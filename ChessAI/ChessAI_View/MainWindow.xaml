@@ -1,0 +1,126 @@
+﻿<Window x:Class="ChessAI_View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ChessAI_View"
+        xmlns:vm="clr-namespace:ChessAI_ViewModel;assembly=ChessAI_ViewModel"
+        xmlns:converter="clr-namespace:ChessAI_View.Converter"
+        mc:Ignorable="d"
+        Title="Chess AI" Height="1000" Width="1400" MinWidth="800" MinHeight="800" Icon="/Pictures/Chess_Icon.png">
+
+    <Window.DataContext>
+        <vm:ChessboardVM/>
+    </Window.DataContext>
+    <Window.Resources>
+        <converter:BackgroundConverter x:Key="BackgroundConverter"/>
+        <converter:IsFigureConverter x:Key="IsFigureConverter"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="100"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.Background>
+            <ImageBrush ImageSource="/Pictures/Skyline.jpg"/>
+        </Grid.Background>
+
+        <Grid x:Name="Chessboard" Grid.Row="1" Grid.Column="1" Visibility="{Binding Path=IsBoardVisible, UpdateSourceTrigger=PropertyChanged}" MaxWidth="800" MaxHeight="800">
+            <Grid.Background>
+                <ImageBrush ImageSource="/Pictures/wood.jpg"/>
+            </Grid.Background>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="40"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <Border BorderBrush="Black" BorderThickness="2" Grid.ColumnSpan="10" Grid.RowSpan="10">
+                <Border.Effect>
+                    <DropShadowEffect/>
+                </Border.Effect>
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding Path=Board.FigureList}" Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="1" Grid.RowSpan="8">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="8" Rows="8"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.Background>
+                                <ImageBrush ImageSource="{Binding Path=Position, Converter={StaticResource BackgroundConverter}}"/>
+                            </Grid.Background>
+                            <Border BorderBrush="#450a0a" BorderThickness="1"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <ItemsControl ItemsSource="{Binding Path=Board.FigureList}" Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="1" Grid.RowSpan="8">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="8" Rows="8"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="20, 10">
+                            <Grid.Background>
+                                <ImageBrush ImageSource="{Binding Converter={StaticResource IsFigureConverter}}"/>
+                            </Grid.Background>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <ItemsControl ItemsSource="{Binding Path=Board.FigureList}" Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="1" Grid.RowSpan="8">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="8" Rows="8"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Button Background="Transparent" BorderBrush="Transparent" Opacity="0.4"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
+        <Button x:Name="StartingButton" Grid.Column="1" Grid.Row="1" Height="100" Width="400" FontSize="30" Visibility="{Binding Path=IsButtonVisible, UpdateSourceTrigger=PropertyChanged}" Command="{Binding Path=NewGameStartCommand}">Start new Game</Button>
+    </Grid>
+</Window>
