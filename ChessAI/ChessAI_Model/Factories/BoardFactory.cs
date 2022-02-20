@@ -6,21 +6,21 @@
 
     public class BoardFactory
     {
-        public Board CreateBoard()
+        public Board CreateBoard(int xSize, int ySize)
         {
-            BaseFigure[,] figures = this.CreateFigures();
+            BaseFigure[,] figures = this.CreateFigures(xSize, ySize);
 
-            return new Board(figures);
+            return new Board(figures, xSize, ySize);
         }
 
-        private BaseFigure[,] CreateFigures()
+        private BaseFigure[,] CreateFigures(int xSize, int ySize)
         {
-            BaseFigure[,] figures = new BaseFigure[8, 8];
+            BaseFigure[,] figures = new BaseFigure[ySize, xSize];
             figures = this.CreateBlackFigures(figures);
 
             for (int y = 2; y < 6; y++)
             {
-                for (int x = 0; x < 8; x++)
+                for (int x = 0; x < xSize; x++)
                 {
                     figures[y, x] = new EmptyFigure(new Position(x, y), false);
                 }

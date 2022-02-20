@@ -2,6 +2,7 @@
 {
     using System;
 
+    [Serializable]
     public class Position
     {
         private int x;
@@ -21,7 +22,7 @@
                 return this.x;
             }
 
-            private set
+            set
             {
                 if (value < 0 || value > 7)
                 {
@@ -39,7 +40,7 @@
                 return this.y;
             }
 
-            private set
+            set
             {
                 if (value < 0 || value > 7)
                 {

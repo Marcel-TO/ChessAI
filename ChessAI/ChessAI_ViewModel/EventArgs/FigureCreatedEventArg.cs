@@ -1,18 +1,18 @@
-﻿namespace ChessAI_ViewModel.Figures
+﻿namespace ChessAI_ViewModel.EventArgs
 {
     using System;
-    using ChessAI_Model.Figures;
+    using ChessAI_ViewModel.Figures;
 
-    public abstract class BaseFigureVM
+    public class FigureCreatedEventArg
     {
-        private BaseFigure figure;
+        private BaseFigureVM figure;
 
-        public BaseFigureVM(BaseFigure figure)
+        public FigureCreatedEventArg(BaseFigureVM figure)
         {
             this.Figure = figure;
         }
 
-        public BaseFigure Figure
+        public BaseFigureVM Figure
         {
             get
             {

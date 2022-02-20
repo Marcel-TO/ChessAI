@@ -2,10 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Windows.Input;
     using ChessAI_Model.Figures;
+    using ChessAI_Model.Interfaces;
     using ChessAI_Model.Logic;
+    using ChessAI_ViewModel.AI;
+    using ChessAI_ViewModel.EventArgs;
     using ChessAI_ViewModel.Factories;
     using ChessAI_ViewModel.Figures;
     using ChessAI_ViewModel.Logic;
@@ -16,19 +20,28 @@
 
         public string isButtonVisible;
 
-        private List<BaseFigureVM> fields;
+        private ObservableCollection<BaseFigureVM> fields;
 
         private BoardVM board;
 
         private BoardFactoryVM factory;
+
+        private ExecutionerVM execute;
+
+        private ChessAIVM chessAI;
 
         public ChessboardVM()
         {
             this.IsBoardVisible = "Collapsed";
             this.IsButtonVisible = "Visible";
 
-            this.factory = new BoardFactoryVM();
-            this.Board = this.factory.CreateBoardVM();
+            this.chessAI = new ChessAIVM();
+            this.chessAI.AIMoved += this.AIMoved;
+            this.execute = new ExecutionerVM();
+            this.execute.FigureSelected += this.FigureSelected;
+            this.factory = new BoardFactoryVM(new FigureFactoryVM());
+            this.Board = this.factory.CreateBoardVM(8, 8);
+            this.Fields = new ObservableCollection<BaseFigureVM>(this.Board.FigureVMList);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -80,7 +93,18 @@
             }
         }
 
-        public List<BaseFigureVM> Fields
+        public ICommand SelectFigureCommand
+        {
+            get
+            {
+                return new GenericCommand(figureObj =>
+                {
+                    this.SelectFigure(figureObj);
+                });
+            }
+        }
+
+        public ObservableCollection<BaseFigureVM> Fields
         {
             get
             {
@@ -122,8 +146,36 @@
             this.IsBoardVisible = "Visible";
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsButtonVisible)));
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsBoardVisible)));
+        }
 
+        private void SelectFigure(object figureObj)
+        {
+            if (figureObj is BaseFigureVM)
+            {
+                BaseFigureVM figure = (BaseFigureVM)figureObj;
+                this.execute.FigureSelection(figure, this.Board);
+            }
+        }
 
+        protected void FigureSelected(object sender, BoardVMEventArgs e)
+        {
+            this.Board = e.Board;
+            this.Fields = new ObservableCollection<BaseFigureVM>(this.Board.FigureVMList);
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Board)));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Fields)));
+
+            if (!this.Board.Board.IsItWhitesTurn) 
+            {
+                this.chessAI.EvaluateMoves(this.Board);
+            }
+        }
+
+        protected void AIMoved(object sender, BoardVMEventArgs e)
+        {
+            this.Board = e.Board;
+            this.Fields = new ObservableCollection<BaseFigureVM>(this.Board.FigureVMList);
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Board)));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Fields)));
         }
     }
 }

@@ -15,6 +15,7 @@
     <Window.Resources>
         <converter:BackgroundConverter x:Key="BackgroundConverter"/>
         <converter:IsFigureConverter x:Key="IsFigureConverter"/>
+        <converter:AttributesConverter x:Key="AttributeConverter"/>
     </Window.Resources>
     
     <Grid>
@@ -70,7 +71,7 @@
                 </Border.Effect>
             </Border>
 
-            <ItemsControl ItemsSource="{Binding Path=Board.FigureList}" Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="1" Grid.RowSpan="8">
+            <ItemsControl ItemsSource="{Binding Path=Fields}" Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="1" Grid.RowSpan="8">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="8" Rows="8"/>
@@ -80,7 +81,7 @@
                     <DataTemplate>
                         <Grid>
                             <Grid.Background>
-                                <ImageBrush ImageSource="{Binding Path=Position, Converter={StaticResource BackgroundConverter}}"/>
+                                <ImageBrush ImageSource="{Binding Path=Figure.Position, Converter={StaticResource BackgroundConverter}}"/>
                             </Grid.Background>
                             <Border BorderBrush="#450a0a" BorderThickness="1"/>
                         </Grid>
@@ -88,7 +89,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <ItemsControl ItemsSource="{Binding Path=Board.FigureList}" Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="1" Grid.RowSpan="8">
+            <ItemsControl ItemsSource="{Binding Path=Fields}" Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="1" Grid.RowSpan="8">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="8" Rows="8"/>
@@ -98,14 +99,14 @@
                     <DataTemplate>
                         <Grid Margin="20, 10">
                             <Grid.Background>
-                                <ImageBrush ImageSource="{Binding Converter={StaticResource IsFigureConverter}}"/>
+                                <ImageBrush ImageSource="{Binding Path=Figure, Converter={StaticResource IsFigureConverter}}"/>
                             </Grid.Background>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <ItemsControl ItemsSource="{Binding Path=Board.FigureList}" Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="1" Grid.RowSpan="8">
+            <ItemsControl x:Name="Figures" ItemsSource="{Binding Path=Fields}" Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="1" Grid.RowSpan="8">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="8" Rows="8"/>
@@ -114,7 +115,9 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid>
-                            <Button Background="Transparent" BorderBrush="Transparent" Opacity="0.4"/>
+                            <Button Background="{Binding Path=Figure, Converter={StaticResource AttributeConverter}}" BorderBrush="Transparent" Opacity="0.4"
+                                    CommandParameter="{Binding}"
+                                    Command="{Binding ElementName=Figures, Path=DataContext.SelectFigureCommand}"/>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
