@@ -44,7 +44,7 @@
 
             for (int x = 0; x < 8; x++)
             {
-                currentFigures[1, x] = new PawnFigure(new Position(x, 1), false);
+                currentFigures[1, x] = new PawnFigure(new Position(x, 1), true);
             }
 
             return currentFigures;

@@ -29,35 +29,35 @@
             this.possibleMoves = new List<BaseFigure[,]>();
             board = this.ResetAttributes(board);
 
-            for (int y = 0; y < board.Height; y++)
-            {
-                for (int x = 0; x < board.Width; x++)
-                {
-                    if (board.Figures[y, x].Name != "Empty" && !board.Figures[y, x].IsWhite)
-                    {
-                        // Gets current active piece.
-                        board.CurrentActive = board.Figures[y, x];
-                        board.Figures[y, x].IsActive = true;
+            //for (int y = 0; y < board.Height; y++)
+            //{
+            //    for (int x = 0; x < board.Width; x++)
+            //    {
+            //        if (board.Figures[y, x].Name != "Empty" && !board.Figures[y, x].IsWhite)
+            //        {
+            //            // Gets current active piece.
+            //            board.CurrentActive = board.Figures[y, x];
+            //            board.Figures[y, x].IsActive = true;
 
-                        // Gets all moves from the active piece.
-                        List<Position> moves = board.Figures[y, x].PossibleMoves(board.Figures[y, x], board.Figures, board.Width);
+            //            // Gets all moves from the active piece.
+            //            List<Position> moves = board.Figures[y, x].PossibleMoves(board.Figures[y, x], board.Figures, board.Width);
 
-                        for (int i = 0; i < moves.Count; i++)
-                        {
-                            Board newBoard = board.Clone(board);
-                            newBoard.Figures[moves[i].Y, moves[i].X].IsSelected = true;
-                            this.execute.FigureSelection(newBoard.Figures[moves[i].Y, moves[i].X], newBoard); // Gibt noch Probleme damit sich das base board nicht ändert.
-                            newBoard.Figures[moves[i].Y, moves[i].X].IsSelected = false;
-                        }
+            //            for (int i = 0; i < moves.Count; i++)
+            //            {
+            //                Board newBoard = board.Clone(board);
+            //                newBoard.Figures[moves[i].Y, moves[i].X].IsSelected = true;
+            //                this.execute.FigureSelection(newBoard.Figures[moves[i].Y, moves[i].X], newBoard);
+            //                newBoard.Figures[moves[i].Y, moves[i].X].IsSelected = false;
+            //            }
 
-                        // Resets the current active piece.
-                        board.CurrentActive = null;
-                        board.Figures[y, x].IsActive = false;
-                    }
-                }
-            }
+            //            // Resets the current active piece.
+            //            board.CurrentActive = null;
+            //            board.Figures[y, x].IsActive = false;
+            //        }
+            //    }
+            //}
 
-            // MinMaxAlgo
+            this.MinimaxAlgorithm(board, board.Width, board.IsItWhitesTurn);
 
             int index = this.GetIndexOfLowestDominance(this.possibleMoves, board.Width);
             board.Figures = this.possibleMoves[index];
@@ -126,36 +126,84 @@
             return index;
         }
 
-        private void MinimaxAlgorithm(List<BaseFigure[,]> possibleMoves, int size, bool aiIsWhite)
+        private void MinimaxAlgorithm(Board currentBoard, int size, bool aiIsWhite)
         {
             // The search depth of the minimax algorithm.
             int searchDepth = 2;
             // The list of all possible moves from each search depth.
+            Dominance minimax = new Dominance(currentBoard.Figures, size);
 
-            for (int i = searchDepth; i > 0; i++)
-            {
-                // Get the new possible moves for each current move.
-                // Calculate dominance (get the minimum for calculating the best move for enemy).
-                // Get the new possible moves again......
-            }
+            // Get the new possible moves for each current move.
+            minimax.PossibleMoves = this.InitializeMoves(currentBoard.Clone(currentBoard), searchDepth, size, aiIsWhite);
+
+            // Calculate dominance (get the minimum for calculating the best move for enemy).
+            var test = this.GetAmountOfGoodMoves(minimax);
+            // Get the new possible moves again......
         }
 
-        private List<BaseFigure[,]> InitializeMoves(BaseFigure[,] currentBoard, int size, bool isWhitesTurn)
+        private List<Dominance> InitializeMoves(Board board, int searchDepth, int size, bool isWhitesTurn)
         {
-            List<BaseFigure[,]> possibleMoves = new List<BaseFigure[,]>();
+            List<Dominance> possibleMoves = new List<Dominance>();
+
+            // If search depth reached limit, returns empty list.
+            if (searchDepth == 0)
+            {
+                return possibleMoves;
+            }
 
             for (int y = 0; y < size; y++)
             {
                 for (int x = 0; x < size; x++)
                 {
-                    if (currentBoard[y, x].Name != "Empty" && currentBoard[y, x].IsWhite == isWhitesTurn)
+                    if (board.Figures[y, x].Name != "Empty" && board.Figures[y, x].IsWhite == isWhitesTurn)
                     {
-                        
+                        // Gets current active piece.
+                        board.CurrentActive = board.Figures[y, x];
+                        board.Figures[y, x].IsActive = true;
+
+                        // Gets all moves from the active piece.
+                        List<Position> moves = board.Figures[y, x].PossibleMoves(board.Figures[y, x], board.Figures, board.Width);
+
+                        for (int i = 0; i < moves.Count; i++)
+                        {
+                            Board newBoard = board.Clone(board);
+                            newBoard.Figures[moves[i].Y, moves[i].X].IsSelected = true;
+                            newBoard.Figures = this.execute.AISelection(newBoard.Figures[moves[i].Y, moves[i].X], newBoard);
+                            newBoard.Figures[moves[i].Y, moves[i].X].IsSelected = false;
+
+                            possibleMoves.Add(new Dominance(newBoard.Figures, size));
+                            possibleMoves[possibleMoves.Count - 1].PossibleMoves = this.InitializeMoves(newBoard, searchDepth - 1, size, !isWhitesTurn);
+                        }
+
+                        // Resets the current active piece.
+                        board.CurrentActive = null;
+                        board.Figures[y, x].IsActive = false;
                     }
                 }
             }
 
             return possibleMoves;
+        }
+
+        private void GatherBestDominance(Dominance minimax, int searchDepth)
+        {
+            List<List<int>> dominances = new List<List<int>>();
+
+            for (int i = 0; i < minimax.PossibleMoves.Count; i++)
+            {
+                //dominances.Add(this.GetDominances(minimax.PossibleMoves[i], searchDepth));
+            }
+        }
+
+        private List<List<int>> GetAmountOfGoodMoves(Dominance move)
+        {
+            List<List<int>> dominances = new List<List<int>>();
+
+            for (int i = 0; i < move.PossibleMoves.Count; i++)
+            {
+            }
+
+            return dominances;
         }
     }
 }

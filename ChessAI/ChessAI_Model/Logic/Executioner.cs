@@ -14,12 +14,6 @@
 
         public void FigureSelection(BaseFigure current, Board board)
         {
-            if (!board.IsItWhitesTurn)
-            {
-                this.AISelection(current, board);
-                return;
-            }
-
             if (!current.IsActive && !current.IsSelected)
             {
                 // Checks if player uses an empty field.
@@ -66,43 +60,9 @@
             this.FigureSelected?.Invoke(this, new BoardEventArgs(board));
         }
 
-        private void AISelection(BaseFigure current, Board board)
+        public BaseFigure[,] AISelection(BaseFigure current, Board board)
         {
-            if (!current.IsActive && !current.IsSelected)
-            {
-                // Checks if AI uses an empty field.
-                if (current.Name == "Empty") // Useless?
-                {
-                    board.Figures = this.ResetFigureAttributes(board);
-                    this.AISelected?.Invoke(this, new FieldsEventArgs(board.Figures)); // Wrong
-                    return;
-                }
-
-                // Checks that the AI can only use black pieces.
-                if (current.IsWhite) // Useless?
-                {
-                    board.Figures = this.ResetFigureAttributes(board);
-                    this.AISelected?.Invoke(this, new FieldsEventArgs(board.Figures)); // Wrong
-                    return;
-                }
-
-                // Reset earlier attributes.
-                board.Figures = this.ResetFigureAttributes(board);
-
-                // Set new attributes.
-                current.IsActive = true;
-                board.CurrentActive = current;
-                List<Position> moves = current.PossibleMoves(current, board.Figures, board.Width);
-
-                // override possible move attributes to list.
-                board.Figures = this.SelectPossibleMoves(moves, board);
-            }
-            else if (current.IsActive) // Useless?
-            {
-                current.IsActive = false;
-                board.CurrentActive = null;
-            }
-            else if (current.IsSelected)
+            if (current.IsSelected)
             {
                 board = this.MovePiece(current, board);
                 board.Figures = this.ResetFigureAttributes(board);
@@ -111,7 +71,7 @@
             }
 
             board.Figures = this.SynchroniseBoard(board);
-            this.AISelected?.Invoke(this, new FieldsEventArgs(board.Figures));
+            return board.Figures;
         }
 
         private BaseFigure[,] SynchroniseBoard(Board board)
